@@ -106,28 +106,6 @@ def preview(req: PreviewRequest):
     return {"html": html}
 
 
-@app.post("/generate/pdf")
-async def generate_pdf(req: GenerateRequest):
-    html = render_template(req.name, req.data)
-
-    try:
-        from weasyprint import HTML
-        pdf_bytes = HTML(string=html).write_pdf()
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail=f"{type(exc).__name__}: {exc}",
-        )
-
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'attachment; filename="{req.name}.pdf"'
-        },
-    )
-
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
