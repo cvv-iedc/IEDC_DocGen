@@ -11,7 +11,19 @@ export default function DownloadButtons({ templateName, formData, disabled }) {
     try {
       await downloadPdf(templateName, formData);
     } catch (e) {
-      setError("PDF generation failed. Is the backend running?");
+      // Extract the real error from the server response if available
+      let msg = "PDF generation failed.";
+      if (e?.response?.data) {
+        try {
+          const text = await e.response.data.text?.() ?? JSON.stringify(e.response.data);
+          msg += " Server: " + text.slice(0, 200);
+        } catch {
+          msg += " Status: " + (e?.response?.status ?? "unknown");
+        }
+      } else {
+        msg += " " + (e?.message ?? "Is the backend running?");
+      }
+      setError(msg);
     } finally {
       setPdfLoading(false);
     }
