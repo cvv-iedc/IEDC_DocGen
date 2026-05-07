@@ -110,8 +110,14 @@ def preview(req: PreviewRequest):
 async def generate_pdf(req: GenerateRequest):
     html = render_template(req.name, req.data)
 
-    from weasyprint import HTML
-    pdf_bytes = HTML(string=html).write_pdf()
+    try:
+        from weasyprint import HTML
+        pdf_bytes = HTML(string=html).write_pdf()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"{type(exc).__name__}: {exc}",
+        )
 
     return Response(
         content=pdf_bytes,
